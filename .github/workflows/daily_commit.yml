@@ -2,32 +2,33 @@ name: Daily Commit
 
 on:
   schedule:
-    - cron: '0 8 * * *'    # 8am UTC every day
-    - cron: '0 11 * * *'   # 11am
-    - cron: '0 14 * * *'   # 2pm
-    - cron: '0 17 * * *'   # 5pm
-    - cron: '0 20 * * *'   # 8pm
+    - cron: '0 8 * * *'
+    - cron: '0 11 * * *'
+    - cron: '0 14 * * *'
+    - cron: '0 17 * * *'
+    - cron: '0 20 * * *'
+
+permissions:
+  contents: write        # ✅ Fix 1: grant write access
 
 jobs:
   commit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}   # ✅ Fix 2: authenticate checkout
 
       - name: Maybe commit
         run: |
-          # 70% chance of committing at each run
           if [ $(( RANDOM % 10 )) -lt 3 ]; then
             echo "Skipped this run"
             exit 0
           fi
-
           git config user.name  "Muhammad Faizan"
           git config user.email "engrfaizan.ai@gmail.com"
-
           DATE=$(date "+%Y-%m-%d %H:%M:%S")
           echo "- ${DATE}" >> log.md
-
           git add log.md
           git commit -m "chore: daily commit ${DATE}"
           git push
